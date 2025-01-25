@@ -1,6 +1,7 @@
 package application
 
 import (
+	"context"
 	"crypto/tls"
 	"encoding/base64"
 	"encoding/json"
@@ -17,6 +18,7 @@ import (
 	"github.com/wissance/Ferrum/data"
 	"github.com/wissance/Ferrum/dto"
 	"github.com/wissance/Ferrum/errors"
+	"github.com/wissance/Ferrum/utils/encoding"
 	"github.com/wissance/stringFormatter"
 )
 
@@ -29,8 +31,11 @@ const (
 )
 
 var (
-	testKey        = []byte("qwerty1234567890")
-	testServerData = data.ServerData{
+	testSalt           = "salt"
+	encoder            = encoding.NewPasswordJsonEncoder(testSalt)
+	testHashedPassword = encoder.GetB64PasswordHash("1234567890")
+	testKey            = []byte("qwerty1234567890")
+	testServerData     = data.ServerData{
 		Realms: []data.Realm{
 			{
 				Name: testRealm1, TokenExpiration: testAccessTokenExpiration, RefreshTokenExpiration: testRefreshTokenExpiration,
@@ -39,16 +44,18 @@ var (
 						Type:  data.ClientIdAndSecrets,
 						Value: testClient1Secret,
 					}},
-				}, Users: []interface{}{
+				},
+				Users: []interface{}{
 					map[string]interface{}{
 						"info": map[string]interface{}{
 							"sub":  "667ff6a7-3f6b-449b-a217-6fc5d9ac0723",
 							"name": "vano", "preferred_username": "vano",
 							"given_name": "vano ivanov", "family_name": "ivanov", "email_verified": true,
 						},
-						"credentials": map[string]interface{}{"password": "1234567890"},
+						"credentials": map[string]interface{}{"password": testHashedPassword},
 					},
 				},
+				PasswordSalt: testSalt,
 			},
 		},
 	}
@@ -85,6 +92,7 @@ func TestApplicationOnHttps(t *testing.T) {
 }
 
 func testRunCommonTestCycleImpl(t *testing.T, appConfig *config.AppConfig, baseUrl string) {
+	ctx := context.Background()
 	app := CreateAppWithData(appConfig, &testServerData, testKey, true)
 	res, err := app.Init()
 	assert.True(t, res)
@@ -158,7 +166,7 @@ func testRunCommonTestCycleImpl(t *testing.T, appConfig *config.AppConfig, baseU
 	response = refreshToken(t, baseUrl, realm, testClient1, testClient1Secret, token.RefreshToken)
 	assert.Equal(t, response.Status, "200 OK")
 
-	res, err = app.Stop()
+	res, err = app.Stop(ctx)
 	assert.True(t, res)
 	assert.Nil(t, err)
 }
