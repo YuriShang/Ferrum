@@ -1,4 +1,4 @@
-# Ferrum
+# Ferrum .
 
 Ferrum is a **better** Authorization Server, this is a Community version.
 
