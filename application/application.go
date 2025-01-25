@@ -157,8 +157,8 @@ func (app *Application) Init() (bool, error) {
 }
 
 // Stop function that stops application
-/* Now doesn't do anything, just a stub
- * Parameters : no
+/* Now just shutdowns http server
+ * Parameters : ctx - context
  * Returns result of app stop and error
  */
 func (app *Application) Stop(ctx context.Context) (bool, error) {

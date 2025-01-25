@@ -4,7 +4,7 @@ run:
 
   modules-download-mode: readonly
 
-  go: '1.22'
+  go: '1.21'
 
 output:
   # colored-line-number|line-number|json|tab|checkstyle|code-climate|junit-xml|github-actions
@@ -34,7 +34,7 @@ linters-settings:
     sections:
       - standard
       - default
-      - prefix(gitlab.sima-land.ru/sl/it/dev-dep/web-services/ad-data-operator)
+      - prefix(github.com/Wissance/Ferrum)
   gocyclo:
     min-complexity: 5
   varnamelen:
